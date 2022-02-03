@@ -9,7 +9,14 @@
 class Boid : public sf::Sprite
 {
     private:
-    float max_turn = 0.03;
+        float max_turn = 0.03;
+
+        float floatMod(float num, float mod)
+            {
+                std::cout<<num - floor(num / mod) * mod << std::endl;
+                return num - floor(num / mod) * mod;
+            }
+
     public:
         float posX;
         float posY;
@@ -20,8 +27,9 @@ class Boid : public sf::Sprite
         {
             posX = x;
             posY = y;
-            rotation = angle;
+            rotate(angle);
             speed = s;
+            
         }
 
         void move()
@@ -47,18 +55,18 @@ class Boid : public sf::Sprite
         {
             if(posX < 100)
             {
-                if(rotation > M_PI)
+                if(floatMod(rotation, M_PI * 2) > M_PI)
                 {
-                    rotate(-.1);
+                    rotate(.1);
                 }
                 else
                 {
-                    rotate(.1);
+                    rotate(-.1);
                 }
             }
             else if(posX > 900)
             {
-                if(rotation < M_PI)
+                if(floatMod(rotation, M_PI * 2) > M_PI)
                 {
                     rotate(-.1);
                 }
@@ -83,14 +91,14 @@ class Boid : public sf::Sprite
 
 
 
+
+
 int main() 
 {
     srand(time(0));
-
-    std::cout<<"eggnuts";
     sf::RenderWindow window(sf::VideoMode(1000, 1000), "minesweeper", sf::Style::Close);
 
-    Boid boy(200, 200, 0, 3);
+    Boid boy(800, 200, M_PI/4, 3);
     sf::Texture text;
     text.loadFromFile("boi.png");
     boy.setTexture(text);
