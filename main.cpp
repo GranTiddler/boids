@@ -55,35 +55,49 @@ class Boid : public sf::Sprite
         {
             if(posX < 100)
             {
-                if(floatMod(rotation, M_PI * 2) > M_PI)
+                if(floatMod(rotation, M_PI * 2) < M_PI)
                 {
-                    rotate(.1);
+                    rotate(-.1 * 10 / posX);
                 }
                 else
                 {
-                    rotate(-.1);
+                    rotate(.1 * 10 / posX);
                 }
             }
             else if(posX > 900)
             {
                 if(floatMod(rotation, M_PI * 2) > M_PI)
                 {
-                    rotate(-.1);
+                    rotate(-.1 * 10 / (1000 - posX));
                 }
                 else
                 {
-                    rotate(.1);
+                    rotate(.1 * 10 / (1000 - posX));
                 }
             }
 
 
             if(posY < 100)
             {
-                rotate(max_turn);
+                if(floatMod(rotation +  M_PI_2, M_PI * 2) > M_PI)
+                {
+                    rotate(-.1 * 10 / posY);
+                }
+                else
+                {
+                    rotate(.1 * 10 / posY);
+                }
             }
             else if(posY > 900)
             {
-                rotate(max_turn);
+                if(floatMod(rotation +  M_PI_2, M_PI * 2) < M_PI)
+                {
+                    rotate(-.1 * 10 / (1000 - posY));
+                }
+                else
+                {
+                    rotate(.1 * 10 / (1000 - posY));
+                }
             }
         }
 
@@ -98,7 +112,7 @@ int main()
     srand(time(0));
     sf::RenderWindow window(sf::VideoMode(1000, 1000), "minesweeper", sf::Style::Close);
 
-    Boid boy(800, 200, M_PI/4, 3);
+    Boid boy(800, 200, M_PI * .4, 3);
     sf::Texture text;
     text.loadFromFile("boi.png");
     boy.setTexture(text);
