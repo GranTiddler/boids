@@ -10,6 +10,7 @@ class Boid : public sf::Sprite
 {
     private:
         float max_turn = 0.03;
+        int wallAvoid = 100;
 
         float floatMod(float num, float mod)
             {
@@ -64,22 +65,22 @@ class Boid : public sf::Sprite
             {
                 if(floatMod(rotation, M_PI * 2) < M_PI)
                 {
-                    rotate(-.1 * 10 / posX);
+                    rotate(-.1 * wallAvoid / posX);
                 }
                 else
                 {
-                    rotate(.1 * 10 / posX);
+                    rotate(.1 * wallAvoid / posX);
                 }
             }
             else if(posX > 900)
             {
                 if(floatMod(rotation, M_PI * 2) > M_PI)
                 {
-                    rotate(-.1 * 10 / (1000 - posX));
+                    rotate(-.1 * wallAvoid / (1000 - posX));
                 }
                 else
                 {
-                    rotate(.1 * 10 / (1000 - posX));
+                    rotate(.1 * wallAvoid / (1000 - posX));
                 }
             }
 
@@ -88,22 +89,22 @@ class Boid : public sf::Sprite
             {
                 if(floatMod(rotation +  M_PI_2, M_PI * 2) > M_PI)
                 {
-                    rotate(-.1 * 10 / posY);
+                    rotate(-.1 * wallAvoid / posY);
                 }
                 else
                 {
-                    rotate(.1 * 10 / posY);
+                    rotate(.1 * wallAvoid / posY);
                 }
             }
             else if(posY > 900)
             {
                 if(floatMod(rotation +  M_PI_2, M_PI * 2) < M_PI)
                 {
-                    rotate(-.1 * 10 / (1000 - posY));
+                    rotate(-.1 * wallAvoid / (1000 - posY));
                 }
                 else
                 {
-                    rotate(.1 * 10 / (1000 - posY));
+                    rotate(.1 * wallAvoid / (1000 - posY));
                 }
             }
         }
@@ -126,7 +127,7 @@ float dist(Boid p1, Boid p2){
 
 int main() 
 {
-    int numChilds = 1000;
+    int numChilds = 2600;
     int chunks = 10;
 
     int range = 10;
@@ -142,7 +143,7 @@ int main()
     {
 
         
-        children[i] = Boid(200, 200, 0, 2);
+        children[i] = Boid(500, 500, 0, 2);
         children[i].setTexture(text);
         children[i].setScale(.1, .1);
         children[i].rotate(rand() * M_PI * 2 / RAND_MAX);
@@ -153,7 +154,7 @@ int main()
         
     }
     
-    int chunkList[numChilds];
+    std::vector<int> chunkList[chunks][chunks];
     int xChunk;
     int yChunk;
     
@@ -175,23 +176,30 @@ int main()
 
         for(int i = 0; i < numChilds; i++){
             children[i].move();
-            children[i].rotateRand();
+            //children[i].rotateRand();
             children[i].avoidWalls();
             window.draw(children[i]);
 
-            xChunk = (children[i].posX - (int)floatMod(children[i].posX, 1000/chunks)) / chunks;
-            yChunk = (children[i].posY - (int)floatMod(children[i].posY, 1000/chunks)) / chunks;
+            xChunk = (children[i].posX - (int)floatMod(children[i].posX, 1000/chunks)) / (1000/chunks);
+            yChunk = (children[i].posY - (int)floatMod(children[i].posY, 1000/chunks)) / (1000/chunks);
 
-            chunkList[i] = (yChunk * chunks) + xChunk;
+            if (xChunk < 0){
+                std::cout<<xChunk<<std::endl;
+            }
+
+            chunkList[xChunk][yChunk].push_back(i);
+
         }
-        
-        
-        
-        
-
-        
 
 
+
+        for(int i = 0; i < chunks; i++)
+        {
+            for(int j = 0; j < chunks; j++)
+            {
+                chunkList[i][j].clear();
+            }
+        }
         window.display();
         
     }
