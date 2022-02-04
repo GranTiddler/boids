@@ -127,12 +127,14 @@ float dist(Boid p1, Boid p2){
 
 int main() 
 {
-    int numChilds = 2600;
+    int rad = 40;
+
+    int numChilds = 500;
     int chunks = 10;
 
     int range = 10;
     srand(time(0));
-    sf::RenderWindow window(sf::VideoMode(1000, 1000), "minesweeper", sf::Style::Close);
+    sf::RenderWindow window(sf::VideoMode(1000, 1000), "BOID", sf::Style::Close);
 
     Boid children[numChilds];
 
@@ -143,9 +145,9 @@ int main()
     {
 
         
-        children[i] = Boid(500, 500, 0, 2);
+        children[i] = Boid(200, 200, 0, 2);
         children[i].setTexture(text);
-        children[i].setScale(.1, .1);
+        children[i].setScale(.2, .2);
         children[i].rotate(rand() * M_PI * 2 / RAND_MAX);
 
         
@@ -158,6 +160,7 @@ int main()
     int xChunk;
     int yChunk;
     
+    int nearby;
     
     window.setFramerateLimit(60);
     while (window.isOpen())
@@ -176,7 +179,7 @@ int main()
 
         for(int i = 0; i < numChilds; i++){
             children[i].move();
-            //children[i].rotateRand();
+            children[i].rotateRand();
             children[i].avoidWalls();
             window.draw(children[i]);
 
@@ -191,6 +194,21 @@ int main()
 
         }
 
+        
+        for(int i = 0; i < numChilds; i++)
+        {
+            nearby = 0;
+            xChunk = (children[i].posX - (int)floatMod(children[i].posX, 1000/chunks)) / (1000/chunks);
+            yChunk = (children[i].posY - (int)floatMod(children[i].posY, 1000/chunks)) / (1000/chunks);
+            for(int j = 0; j < chunkList[xChunk][yChunk].size(); j++)
+            {
+                if(dist(children[i], children[chunkList[xChunk][yChunk][j]]) < rad)
+                {
+                    nearby ++;
+                }
+            }
+            std::cout<<nearby<<std::endl;
+        }
 
 
         for(int i = 0; i < chunks; i++)
