@@ -10,7 +10,7 @@ class Boid : public sf::Sprite
 {
 private:
 	float max_turn = 0.03;
-	int wallAvoid = 100;
+	int wallAvoid = 250;
 
 	float floatMod(float num, float mod)
 	{
@@ -125,11 +125,11 @@ float dist(Boid p1, Boid p2)
 
 int main()
 {
-	int rad = 50;
-	float alignment = .050;
+	int rad = 30;
+	float alignment = .05;
 
-	int numChilds = 500;
-	int chunks = 1000 / rad;
+	int numChilds = 1000;
+	int chunks = 1000 / rad * 2;
 
 	int range = 10;
 	srand(time(0));
@@ -142,7 +142,7 @@ int main()
 
 	for (int i = 0; i < numChilds; i++)
 	{
-		children[i] = Boid( 100 + (((float)rand() / RAND_MAX) * 800), 100 + (((float)rand() / RAND_MAX) * 800), 0, 2);
+		children[i] = Boid(100 + (((float)rand() / RAND_MAX) * 800), 100 + (((float)rand() / RAND_MAX) * 800), 0, 2);
 		children[i].setTexture(text);
 		children[i].setScale(.25, .25);
 		children[i].rotate(rand() * M_PI * 2 / RAND_MAX);
@@ -205,13 +205,21 @@ int main()
 						if (dist(children[i], children[chunkList[xChunk + xx][yChunk + y][j]]) < rad)
 						{
 							nearby++;
-							avgRotation += children[chunkList[xChunk + xx][yChunk + y][j]].rotation;
+							avgRotation += floatMod(children[chunkList[xChunk + xx][yChunk + y][j]].rotation, M_PI * 2);
+							//std::cout<<floatMod(children[chunkList[xChunk + xx][yChunk + y][j]].rotation, M_PI * 2)<<std::endl;
 						}
 					}
 				}
 			}
 			avgRotation /= nearby;
-			children[i].rotate((avgRotation - children[i].rotation) * alignment);
+			if ((avgRotation - children[i].rotation) < M_PI)
+			{
+				children[i].rotate((avgRotation - children[i].rotation) * alignment);
+			}
+			else
+			{
+				children[i].rotate(((avgRotation - children[i].rotation) - (2 * M_PI)) * alignment);
+			}
 		}
 
 		for (int i = 0; i < chunks; i++)
