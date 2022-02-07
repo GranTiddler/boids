@@ -70,7 +70,6 @@ public:
 		}
 		else
 		{
-			std::cout<<"e"<<std::endl;
 			rotate(-((2 * M_PI - angle) + floatMod(rotation, M_PI * 2)) * strength);
 		}
 	}
