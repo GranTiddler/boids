@@ -10,7 +10,7 @@ class Boid : public sf::Sprite
 {
 private:
 	float max_turn = 0.03;
-	int wallAvoid = 250;
+	float wallAvoid = 2;
 
 	float floatMod(float num, float mod)
 	{
@@ -58,52 +58,73 @@ public:
 		rotate(((float)rand() * max_turn * 2 / RAND_MAX) - max_turn);
 	}
 
+	void steerTowards(float angle, float strength)
+	{
+		if (angle == floatMod(rotation, M_PI * 2))
+		{
+			return;
+		}
+		else if (angle - floatMod(rotation, M_PI * 2) < M_PI)
+		{
+			rotate((angle - floatMod(rotation, M_PI * 2)) * strength);
+		}
+		else
+		{
+			std::cout<<"e"<<std::endl;
+			rotate(-((2 * M_PI - angle) + floatMod(rotation, M_PI * 2)) * strength);
+		}
+	}
+
+	float thingey(float input)
+	{	
+		return wallAvoid/input;
+	}
+
 	void avoidWalls()
 	{
+
 		if (posX < 100)
 		{
-			if (floatMod(rotation, M_PI * 2) < M_PI)
+			if (posY < 100)
 			{
-				rotate(-.1 * wallAvoid / posX);
+				steerTowards(M_PI * .25, thingey(posY));
+			}
+			else if (posY > 900)
+			{
+				steerTowards(M_PI * 1.75, thingey(1000 - posY));
 			}
 			else
 			{
-				rotate(.1 * wallAvoid / posX);
+				steerTowards(0, thingey(posX));
 			}
+			return;
 		}
 		else if (posX > 900)
 		{
-			if (floatMod(rotation, M_PI * 2) > M_PI)
+			if (posY < 100)
 			{
-				rotate(-.1 * wallAvoid / (1000 - posX));
+				steerTowards(M_PI * .75, thingey(posY));
+			}
+			else if (posY > 900)
+			{
+				steerTowards(M_PI * 1.25, thingey(1000 - posY));
 			}
 			else
 			{
-				rotate(.1 * wallAvoid / (1000 - posX));
+				steerTowards(M_PI, thingey(1000 - posX));
 			}
+			return;
 		}
+
+		
 
 		if (posY < 100)
 		{
-			if (floatMod(rotation + M_PI_2, M_PI * 2) > M_PI)
-			{
-				rotate(-.1 * wallAvoid / posY);
-			}
-			else
-			{
-				rotate(.1 * wallAvoid / posY);
-			}
+			steerTowards(M_PI * .5, thingey(posY));
 		}
 		else if (posY > 900)
 		{
-			if (floatMod(rotation + M_PI_2, M_PI * 2) < M_PI)
-			{
-				rotate(-.1 * wallAvoid / (1000 - posY));
-			}
-			else
-			{
-				rotate(.1 * wallAvoid / (1000 - posY));
-			}
+			steerTowards(M_PI * 1.5, thingey(1000 - posY));
 		}
 	}
 };
@@ -125,10 +146,11 @@ float dist(Boid p1, Boid p2)
 
 int main()
 {
-	int rad = 30;
-	float alignment = .05;
+	int rad = 50;
+	float fov = .5;
+	float alignment = .1;
 
-	int numChilds = 1000;
+	int numChilds = 1;
 	int chunks = 1000 / rad * 2;
 
 	int range = 10;
@@ -158,7 +180,7 @@ int main()
 	window.setFramerateLimit(60);
 	while (window.isOpen())
 	{
-		//if close window button clicked close window
+		// if close window button clicked close window
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -201,25 +223,22 @@ int main()
 				{
 					for (int j = 0; j < chunkList[xChunk + xx][yChunk + y].size(); j++)
 					{
-
 						if (dist(children[i], children[chunkList[xChunk + xx][yChunk + y][j]]) < rad)
 						{
+							/*
+							get relative direction
+
+
+							*/
 							nearby++;
 							avgRotation += floatMod(children[chunkList[xChunk + xx][yChunk + y][j]].rotation, M_PI * 2);
-							//std::cout<<floatMod(children[chunkList[xChunk + xx][yChunk + y][j]].rotation, M_PI * 2)<<std::endl;
+							// std::cout<<floatMod(children[chunkList[xChunk + xx][yChunk + y][j]].rotation, M_PI * 2)<<std::endl;
 						}
 					}
 				}
 			}
 			avgRotation /= nearby;
-			if ((avgRotation - children[i].rotation) < M_PI)
-			{
-				children[i].rotate((avgRotation - children[i].rotation) * alignment);
-			}
-			else
-			{
-				children[i].rotate(((avgRotation - children[i].rotation) - (2 * M_PI)) * alignment);
-			}
+			children[i].steerTowards(avgRotation, alignment);
 		}
 
 		for (int i = 0; i < chunks; i++)
