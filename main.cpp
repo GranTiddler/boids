@@ -10,7 +10,7 @@ class Boid : public sf::Sprite
 {
 private:
 	float max_turn = 0.03;
-	float wallAvoid = 2;
+	float wallAvoid = .03;
 
 	float floatMod(float num, float mod)
 	{
@@ -51,6 +51,7 @@ public:
 	{
 		sf::Sprite::rotate(angle * (360 / (M_PI * 2)));
 		rotation += angle;
+		rotation = floatMod(rotation + (M_PI * 2), M_PI * 2);
 	}
 
 	void rotateRand()
@@ -60,23 +61,46 @@ public:
 
 	void steerTowards(float angle, float strength)
 	{
-		if (angle == floatMod(rotation, M_PI * 2))
+		if (floatMod(rotation, M_PI * 2) == angle)
 		{
 			return;
 		}
-		else if (angle - floatMod(rotation, M_PI * 2) < M_PI)
+
+		float a = (angle - (floatMod(rotation, M_PI * 2)));
+		float b = ((angle + M_PI * 2) - (floatMod(rotation, M_PI * 2)));
+		float c = -((floatMod(rotation, M_PI * 2) + M_PI * 2) - angle);
+
+		if (abs(a) <= M_PI)
 		{
-			rotate((angle - floatMod(rotation, M_PI * 2)) * strength);
+			rotate(a * strength);
+		}
+		else if (abs(b) <= M_PI)
+		{
+			rotate(b * strength);
 		}
 		else
 		{
-			rotate(-((2 * M_PI - angle) + floatMod(rotation, M_PI * 2)) * strength);
+			rotate(c * strength);
 		}
 	}
 
-	float thingey(float input)
-	{	
-		return wallAvoid/input;
+	/*
+
+	left up: A
+	left down: C
+	top left:  A
+	top right: B
+	right up: A
+	right down: A
+	down right: C
+	down left: A
+
+	*/
+
+	float thing(float input)
+	{
+		//return (pow(100-input, wallAvoid))/pow(100, wallAvoid);
+		return(1 / (1 * input));
 	}
 
 	void avoidWalls()
@@ -84,17 +108,18 @@ public:
 
 		if (posX < 100)
 		{
+
 			if (posY < 100)
 			{
-				steerTowards(M_PI * .25, thingey(posY));
+				steerTowards(M_PI * .25, thing(posY) * 2);
 			}
 			else if (posY > 900)
 			{
-				steerTowards(M_PI * 1.75, thingey(1000 - posY));
+				steerTowards(M_PI * 1.75, thing(1000 - posY) * 2);
 			}
 			else
 			{
-				steerTowards(0, thingey(posX));
+				steerTowards(M_PI * 2, thing(posX) * 2);
 			}
 			return;
 		}
@@ -102,28 +127,26 @@ public:
 		{
 			if (posY < 100)
 			{
-				steerTowards(M_PI * .75, thingey(posY));
+				steerTowards(M_PI * .75, thing(posY) * 2);
 			}
 			else if (posY > 900)
 			{
-				steerTowards(M_PI * 1.25, thingey(1000 - posY));
+				steerTowards(M_PI * 1.25, thing(1000 - posY) * 2);
 			}
 			else
 			{
-				steerTowards(M_PI, thingey(1000 - posX));
+				steerTowards(M_PI, thing(1000 - posX) * 2);
 			}
 			return;
 		}
 
-		
-
 		if (posY < 100)
 		{
-			steerTowards(M_PI * .5, thingey(posY));
+			steerTowards(M_PI * .5, thing(posY) * 2);
 		}
 		else if (posY > 900)
 		{
-			steerTowards(M_PI * 1.5, thingey(1000 - posY));
+			steerTowards(M_PI * 1.5, thing(1000 - posY) * 2);
 		}
 	}
 };
@@ -145,11 +168,11 @@ float dist(Boid p1, Boid p2)
 
 int main()
 {
-	int rad = 50;
+	int rad = 20;
 	float fov = .5;
 	float alignment = .1;
 
-	int numChilds = 1;
+	int numChilds = 100;
 	int chunks = 1000 / rad * 2;
 
 	int range = 10;
@@ -163,7 +186,7 @@ int main()
 
 	for (int i = 0; i < numChilds; i++)
 	{
-		children[i] = Boid(100 + (((float)rand() / RAND_MAX) * 800), 100 + (((float)rand() / RAND_MAX) * 800), 0, 2);
+		children[i] = Boid(100 + ((float)rand() * 800 / RAND_MAX), 100 + ((float)rand() * 800 / RAND_MAX), 0, 2);
 		children[i].setTexture(text);
 		children[i].setScale(.25, .25);
 		children[i].rotate(rand() * M_PI * 2 / RAND_MAX);
@@ -192,7 +215,7 @@ int main()
 		for (int i = 0; i < numChilds; i++)
 		{
 			children[i].move();
-			children[i].rotateRand();
+			//children[i].rotateRand();
 			children[i].avoidWalls();
 			window.draw(children[i]);
 
@@ -237,7 +260,7 @@ int main()
 				}
 			}
 			avgRotation /= nearby;
-			children[i].steerTowards(avgRotation, alignment);
+			//children[i].steerTowards(avgRotation, alignment);
 		}
 
 		for (int i = 0; i < chunks; i++)
