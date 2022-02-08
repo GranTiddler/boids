@@ -172,7 +172,7 @@ int main()
 	float fov = .5;
 	float alignment = .1;
 
-	int numChilds = 100;
+	int numChilds = 1000;
 	int chunks = 1000 / rad * 2;
 
 	int range = 10;
@@ -186,7 +186,7 @@ int main()
 
 	for (int i = 0; i < numChilds; i++)
 	{
-		children[i] = Boid(100 + ((float)rand() * 800 / RAND_MAX), 100 + ((float)rand() * 800 / RAND_MAX), 0, 2);
+		children[i] = Boid(500 /*100 + ((float)rand() * 800 / RAND_MAX)*/, 500 /*100 + ((float)rand() * 800 / RAND_MAX)*/, 0, 2);
 		children[i].setTexture(text);
 		children[i].setScale(.25, .25);
 		children[i].rotate(rand() * M_PI * 2 / RAND_MAX);
@@ -215,7 +215,7 @@ int main()
 		for (int i = 0; i < numChilds; i++)
 		{
 			children[i].move();
-			//children[i].rotateRand();
+			children[i].rotateRand();
 			children[i].avoidWalls();
 			window.draw(children[i]);
 
