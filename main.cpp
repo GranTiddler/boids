@@ -10,7 +10,7 @@ class Boid : public sf::Sprite
 {
 private:
 	float max_turn = 0.03;
-	float wallAvoid = .03;
+	float wallAvoid = .3;
 
 	float floatMod(float num, float mod)
 	{
@@ -100,7 +100,8 @@ public:
 	float thing(float input)
 	{
 		//return (pow(100-input, wallAvoid))/pow(100, wallAvoid);
-		return(1 / (1 * input));
+
+		return (1 / (wallAvoid * input));
 	}
 
 	void avoidWalls()
@@ -168,11 +169,11 @@ float dist(Boid p1, Boid p2)
 
 int main()
 {
-	int rad = 20;
+	int rad = 500;
 	float fov = .5;
 	float alignment = .1;
 
-	int numChilds = 1000;
+	int numChilds = 2;
 	int chunks = 1000 / rad * 2;
 
 	int range = 10;
@@ -186,7 +187,7 @@ int main()
 
 	for (int i = 0; i < numChilds; i++)
 	{
-		children[i] = Boid(500 /*100 + ((float)rand() * 800 / RAND_MAX)*/, 500 /*100 + ((float)rand() * 800 / RAND_MAX)*/, 0, 2);
+		children[i] = Boid(100 + ((float)rand() * 800 / RAND_MAX), 100 + ((float)rand() * 800 / RAND_MAX), 0, 2);
 		children[i].setTexture(text);
 		children[i].setScale(.25, .25);
 		children[i].rotate(rand() * M_PI * 2 / RAND_MAX);
@@ -198,6 +199,8 @@ int main()
 
 	int nearby;
 	float avgRotation;
+	float dir;
+	float distance;
 
 	window.setFramerateLimit(60);
 	while (window.isOpen())
@@ -245,13 +248,17 @@ int main()
 				{
 					for (int j = 0; j < chunkList[xChunk + xx][yChunk + y].size(); j++)
 					{
-						if (dist(children[i], children[chunkList[xChunk + xx][yChunk + y][j]]) < rad)
+						distance = dist(children[i], children[chunkList[xChunk + xx][yChunk + y][j]]);
+						if (distance < rad)
 						{
-							/*
-							get relative direction
+							int x = sf::Mouse::getPosition(window).x;
+							int y = sf::Mouse::getPosition(window).y;
 
+							dir = asin((children[i].posY - children[chunkList[xChunk + xx][yChunk + y][j]].posY) / distance);
+							//int stinker = (x - 150) / abs(x - 150);
 
-							*/
+							dir = asin((children[i].posX - children[chunkList[xChunk + xx][yChunk + y][j]].posX) / distance);
+							std::cout << dir << std::endl;
 							nearby++;
 							avgRotation += floatMod(children[chunkList[xChunk + xx][yChunk + y][j]].rotation, M_PI * 2);
 							// std::cout<<floatMod(children[chunkList[xChunk + xx][yChunk + y][j]].rotation, M_PI * 2)<<std::endl;
@@ -260,7 +267,7 @@ int main()
 				}
 			}
 			avgRotation /= nearby;
-			//children[i].steerTowards(avgRotation, alignment);
+			children[i].steerTowards(avgRotation, alignment);
 		}
 
 		for (int i = 0; i < chunks; i++)
